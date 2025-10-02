@@ -1,1 +1,24 @@
-node_modules
+# Node / pnpm
+node_modules/
+pnpm-lock.yaml
+
+# Rust / Tauri
+/target/
+/src-tauri/target/
+src-tauri/Cargo.lock
+
+# Builds
+/dist/
+/build/
+/out/
+/*.log
+
+# PocketBase local
+/pocketbase/pb_data/
+/pocketbase/*.db
+
+# IDEs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
