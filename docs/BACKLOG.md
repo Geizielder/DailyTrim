@@ -4,6 +4,7 @@
 - [ ] Autenticação local com PocketBase
 - [ ] CRUD de tarefas
 - [ ] Timer básico em Rust
+    - [x] Implement Timer básico → Done.
 - [ ] Editor de observações (Markdown)
 - [ ] Dashboard com filtros
 - [ ] Testes unitários e de integração
