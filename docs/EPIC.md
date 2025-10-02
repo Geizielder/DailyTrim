@@ -21,6 +21,7 @@ O diferencial não está nas features (já existem muitas apps de tasks), mas na
 
 ### UC3 – Timer
 - Iniciar/pausar timer por tarefa.  
+- [x] Timer básico” como iniciado/implementado.
 - Timer controlado pelo backend Rust.  
 - Persistência do tempo gasto no PB.  
 

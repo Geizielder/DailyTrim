@@ -4,7 +4,8 @@ Versionamento seguindo [SemVer](https://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Estrutura inicial do projeto
-- Documentação (Épico, Backlog, Roadmap, Versioning, Contributing)
-- Setup de testes unitários (Jest + TypeScript)
+- [x] Estrutura inicial do projeto
+- [x] Documentação (Épico, Backlog, Roadmap, Versioning, Contributing)
+- [x] Setup de testes unitários (Jest + TypeScript)
+- [x] Unreleased → “Added Timer utils (addSeconds, formatTime)".
 
