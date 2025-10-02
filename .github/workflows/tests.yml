@@ -1,0 +1,49 @@
+name: 🧪 Tests Pipeline
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+  pull_request:
+    branches: [ "develop", "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node (para Jest)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # 3. Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: true
+
+      # 4. Rodar testes TypeScript (frontend/tests)
+      - name: Run Jest tests
+        run: |
+          cd tests
+          pnpm jest --ci --runInBand
+
+      # 5. Setup Rust (para backend Tauri)
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # 6. Rodar testes Rust
+      - name: Run Cargo tests
+        run: |
+          cd apps/desktop/src-tauri
+          cargo test --verbose

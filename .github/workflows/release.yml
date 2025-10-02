@@ -1,0 +1,49 @@
+name: 🚀 Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # Ex: v0.1.0, v1.0.0
+
+jobs:
+  build-tauri:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # 1. Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node + pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: true
+
+      # 3. Setup Rust
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # 4. Build Tauri
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "DailyTrim ${{ github.ref_name }}"
+          releaseBody: |
+            Veja [CHANGELOG.md](./docs/CHANGELOG.md) para detalhes.
+          releaseDraft: true
+          prerelease: true
