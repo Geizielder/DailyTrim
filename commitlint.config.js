@@ -17,9 +17,9 @@ export default {
         'chore'
       ]
     ],
-    'scope-empty': [2, 'never'],
+    'scope-empty': [0], // scope é opcional
     'subject-empty': [2, 'never'],
-    'subject-case': [2, 'always', ['sentence-case']],
-    'header-max-length': [2, 'always', 72]
+    'subject-case': [0], // permite qualquer case
+    'header-max-length': [2, 'always', 100]
   }
 }
