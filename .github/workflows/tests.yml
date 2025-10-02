@@ -36,14 +36,20 @@ jobs:
       - name: Run Jest tests
         run: pnpm test
 
-      # 6. Setup Rust (para backend Tauri)
+      # 6. Install Tauri dependencies (Ubuntu)
+      - name: Install Tauri dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # 7. Setup Rust (para backend Tauri)
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
 
-      # 7. Rodar testes Rust
+      # 8. Rodar testes Rust
       - name: Run Cargo tests
         run: |
           cd apps/desktop/src-tauri
