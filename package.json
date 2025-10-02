@@ -6,12 +6,20 @@
     "prepare": "husky",
     "dev:desktop": "pnpm --filter desktop tauri dev",
     "test": "pnpm --filter tests run jest",
-    "lint": "echo \"(lint configurado depois)\""
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
+    "prettier": "^3.6.2",
     "root": "^3.2.0"
   }
 }

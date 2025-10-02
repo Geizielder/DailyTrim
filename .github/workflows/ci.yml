@@ -1,17 +1,19 @@
 name: CI
 
 on:
-  push:
-    branches: [ develop, main ]
   pull_request:
-    branches: [ develop, main ]
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
 
 jobs:
-  build:
+  quality-gates:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # importante para commitlint
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,5 +30,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run tests
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Run unit/integration tests
         run: pnpm test
+
+      - name: Commitlint (validate commit messages)
+        run: |
+          npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=HEAD --verbose
