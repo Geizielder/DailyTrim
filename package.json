@@ -2,8 +2,9 @@
   "name": "dailytrim-monorepo",
   "private": true,
   "version": "0.0.1",
-  "workspaces": [
-    "apps/*",
-    "tests"
-  ]
+  "scripts": {
+    "dev:desktop": "pnpm --filter desktop tauri dev",
+    "test": "pnpm --filter tests run jest",
+    "lint": "echo \"(lint configurado depois)\""
+  }
 }
