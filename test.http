@@ -1,0 +1,96 @@
+
+# @name login_user
+POST http://127.0.0.1:8090/api/collections/users/auth-with-password
+Content-Type: application/json
+
+{
+  "identity": "bob@example.com",
+  "password": "bob12345"
+}
+@userToken = {{login_user.response.body.$.token}}
+@userId    = {{login_user.response.body.$.record.id}}
+###
+GET http://127.0.0.1:8090/api/collections/users/records/7t6r4fso7rh5t7n
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3NjAxMDQ0OTcsImlkIjoiN3Q2cjRmc283cmg1dDduIiwicmVmcmVzaGFibGUiOnRydWUsInR5cGUiOiJhdXRoIn0.EQ9MbCeZwIzkn_RaXplCi8sf89v5KZapDG8ahq7kWfo
+
+###
+
+POST http://127.0.0.1:8090/api/collections/_superusers/auth-with-password
+Content-Type: application/json
+
+{
+  "identity": "geizielder@bedrock.com.br",
+  "password": "Honra2025."
+}
+
+
+###
+
+GET http://127.0.0.1:8090/api/collections/users/records
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MTc1OTU4NzA4OSwiaWQiOiJ5aGh1eTlyY2UyZm15NWYiLCJyZWZyZXNoYWJsZSI6dHJ1ZSwidHlwZSI6ImF1dGgifQ.1XIQ667KEC7Q1G1UUZO3ver4EerGEx5HAexpjsz-N3A
+
+###
+
+POST http://127.0.0.1:8090/api/collections/tasks/records
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "title": "Primeiro teste de inserção",
+  "status": "todo",
+  "priority": "medium",
+  "due_at": null,
+  "timeSpent": 0,
+  "notes": "Tarefa de teste criada pelo REST Client Bob",
+  "owner": "{{userId}}"
+}
+
+###
+
+# @name list_tasks
+# Listar todas as tarefas do usuário autenticado
+GET http://127.0.0.1:8090/api/collections/tasks/records
+Authorization: Bearer {{userToken}}
+
+###
+
+# Listar tarefas com filtro manual (owner = userId)
+GET http://127.0.0.1:8090/api/collections/tasks/records?filter=owner="{{userId}}"
+Authorization: Bearer {{userToken}}
+
+###
+
+# Listar todas as tarefas (paginado) - primeira página
+GET http://127.0.0.1:8090/api/collections/tasks/records?page=1&perPage=50&sort=-created
+Authorization: Bearer {{userToken}}
+
+###
+
+# Buscar uma tarefa específica por ID
+# GET http://127.0.0.1:8090/api/collections/tasks/records/RECORD_ID
+# Authorization: Bearer {{userToken}}
+
+###
+
+# @name get_tasks_collection
+# Ver estrutura da coleção tasks (requer superuser)
+GET http://127.0.0.1:8090/api/collections/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MTc1OTU4NzA4OSwiaWQiOiJ5aGh1eTlyY2UyZm15NWYiLCJyZWZyZXNoYWJsZSI6dHJ1ZSwidHlwZSI6ImF1dGgifQ.1XIQ667KEC7Q1G1UUZO3ver4EerGEx5HAexpjsz-N3A
+
+###
+
+# Deletar uma tarefa
+# DELETE http://127.0.0.1:8090/api/collections/tasks/records/RECORD_ID
+# Authorization: Bearer {{userToken}}
+
+###
+
+# Atualizar uma tarefa
+# PATCH http://127.0.0.1:8090/api/collections/tasks/records/RECORD_ID
+# Authorization: Bearer {{userToken}}
+# Content-Type: application/json
+#
+# {
+#   "status": "done",
+#   "timeSpent": 120
+# }
