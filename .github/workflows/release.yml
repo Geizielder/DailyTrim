@@ -48,7 +48,13 @@ jobs:
           toolchain: stable
           override: true
 
-      # 7. Build Tauri
+      # 7. Cache Cargo dependencies
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      # 8. Build Tauri
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         with:
