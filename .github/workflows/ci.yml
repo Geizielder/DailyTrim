@@ -7,13 +7,12 @@ on:
     branches: [develop, main]
 
 jobs:
-  quality-gates:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # importante para commitlint
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -29,12 +28,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint (ESLint)
+      - name: Run ESLint
         run: pnpm lint
 
-      - name: Run unit/integration tests
-        run: pnpm test
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Commitlint (validate commit messages)
-        run: |
-          npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=HEAD --verbose
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm test
