@@ -42,7 +42,13 @@ jobs:
           toolchain: stable
           override: true
 
-      # 6. Rodar testes Rust
+      # 6. Cache Cargo dependencies
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      # 7. Rodar testes Rust
       - name: Run Cargo tests
         run: |
           cd apps/desktop/src-tauri
