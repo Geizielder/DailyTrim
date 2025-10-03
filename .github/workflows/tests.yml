@@ -15,34 +15,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node (para Jest)
+      # 2. Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+          run_install: false
+
+      # 3. Setup Node (para Jest)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
-      # 3. Setup pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10
-          run_install: true
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: pnpm install
 
-      # 4. Rodar testes TypeScript (frontend/tests)
+      # 5. Rodar testes TypeScript (frontend/tests)
       - name: Run Jest tests
-        run: |
-          cd tests
-          pnpm jest --ci --runInBand
+        run: pnpm test
 
-      # 5. Setup Rust (para backend Tauri)
+      # 6. Install Tauri dependencies (Ubuntu)
+      - name: Install Tauri dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # 7. Setup Rust (para backend Tauri)
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
 
-      # 6. Rodar testes Rust
+      # 8. Cache Cargo dependencies
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      # 9. Rodar testes Rust
       - name: Run Cargo tests
         run: |
           cd apps/desktop/src-tauri
