@@ -15,15 +15,17 @@ Construído com **Tauri + React + PocketBase + Rust**, seguindo disciplina **Man
 - [Contributing](./docs/CONTRIBUTING.md)
 - [Versioning](./docs/VERSIONING.md)
 - [Release Guide](./docs/RELEASE_GUIDE.md)
+- [Navegação](./NAVIGATION.md) - Estrutura de rotas e componentes de navegação
 
 ---
 
 ## 🛠️ Tecnologias
-- [Tauri](https://tauri.app) (MIT/Apache 2.0)  
-- [PocketBase](https://pocketbase.io) (MIT)  
-- [React](https://react.dev) (MIT)  
-- [TailwindCSS](https://tailwindcss.com) (MIT)  
-- [Jest](https://jestjs.io) (MIT)  
+- [Tauri](https://tauri.app) (MIT/Apache 2.0)
+- [PocketBase](https://pocketbase.io) (MIT)
+- [React](https://react.dev) (MIT)
+- [Carbon Design System](https://carbondesignsystem.com) (Apache 2.0)
+- [React Router](https://reactrouter.com) (MIT)
+- [Jest](https://jestjs.io) (MIT)
 - [Rust](https://www.rust-lang.org) (MIT/Apache 2.0)  
 
 ---
