@@ -377,7 +377,33 @@ class NavidromeClient {
 
   async getArtistAlbums(artistId: string): Promise<Album[]> {
     const response = await this.apiRequest<{ artist: Artist & { album: Album[] } }>('getArtist', { id: artistId });
-    return response.artist.album || [];
+    const albums = response.artist.album || [];
+
+    // Para álbuns sem coverArt (Unknown Album), buscar da primeira música
+    const albumsWithCovers = await Promise.all(
+      albums.map(async (album) => {
+        // Se já tem coverArt ou não é Unknown Album, retorna como está
+        if (album.coverArt || album.name !== '[Unknown Album]') {
+          return album;
+        }
+
+        try {
+          // Busca as músicas do álbum para pegar o coverArt da primeira
+          const albumData = await this.getAlbum(album.id);
+          const firstSongWithCover = albumData.songs.find(song => song.coverArt);
+
+          if (firstSongWithCover?.coverArt) {
+            return { ...album, coverArt: firstSongWithCover.coverArt };
+          }
+        } catch (error) {
+          console.warn('Failed to fetch cover for unknown album:', album.id, error);
+        }
+
+        return album;
+      })
+    );
+
+    return albumsWithCovers;
   }
 
   async getAlbum(id: string): Promise<Album & { songs: Song[] }> {
