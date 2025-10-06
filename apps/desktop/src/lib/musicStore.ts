@@ -2,14 +2,15 @@ import { create } from 'zustand';
 import type { Song, PlayerState } from '../types/music';
 import { navidrome } from './navidrome';
 
+/* eslint-disable no-unused-vars */
 interface MusicStore extends PlayerState {
   // Audio element
   audio: HTMLAudioElement | null;
 
   // Actions
-  setCurrentSong: (song: Song | null) => void;
-  addToQueue: (songs: Song[]) => void;
-  removeFromQueue: (index: number) => void;
+  setCurrentSong: (_song: Song | null) => void;
+  addToQueue: (_songs: Song[]) => void;
+  removeFromQueue: (_index: number) => void;
   clearQueue: () => void;
   playPause: () => void;
   play: () => void;
@@ -17,14 +18,15 @@ interface MusicStore extends PlayerState {
   stop: () => void;
   next: () => void;
   previous: () => void;
-  seek: (time: number) => void;
-  setVolume: (volume: number) => void;
+  seek: (_time: number) => void;
+  setVolume: (_volume: number) => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
-  setCurrentTime: (currentTime: number) => void;
-  setDuration: (trackDuration: number) => void;
+  setCurrentTime: (_currentTime: number) => void;
+  setDuration: (_trackDuration: number) => void;
   initAudio: () => void;
 }
+/* eslint-enable no-unused-vars */
 
 export const useMusicStore = create<MusicStore>((set, get) => ({
   // Initial state

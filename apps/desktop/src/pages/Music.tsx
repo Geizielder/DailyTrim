@@ -13,6 +13,7 @@ import {
   Tile,
   Loading,
   InlineNotification,
+  Pagination,
 } from '@carbon/react';
 import { Settings, PlayFilled, Add } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +31,8 @@ export default function Music() {
   const [error, setError] = useState<string | null>(null);
 
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [artistAlbums, setArtistAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { songs: Song[] }) | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +41,11 @@ export default function Music() {
     albums: Album[];
     songs: Song[];
   } | null>(null);
+
+  // Paginação
+  const [artistsPage, setArtistsPage] = useState(1);
+  const [albumsPage, setAlbumsPage] = useState(1);
+  const itemsPerPage = 14;
 
   useEffect(() => {
     checkConfiguration();
@@ -81,10 +89,42 @@ export default function Music() {
   }
 
   async function handleArtistClick(artist: Artist) {
+    try {
+      setIsLoading(true);
+      setSelectedArtist(artist);
+      setSelectedAlbum(null);
+      setSearchResults(null);
+
+      const albums = await navidrome.getArtistAlbums(artist.id);
+      setArtistAlbums(albums);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load artist albums:', err);
+      setError('Erro ao carregar álbuns do artista');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleAlbumClick(album: Album) {
+    try {
+      setIsLoading(true);
+      const albumData = await navidrome.getAlbum(album.id);
+      setSelectedAlbum(albumData);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load album:', err);
+      setError('Erro ao carregar álbum');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleBackToArtists() {
+    setSelectedArtist(null);
+    setArtistAlbums([]);
     setSelectedAlbum(null);
     setSearchResults(null);
-    console.log('Artist clicked:', artist);
-    // TODO: In a real implementation, you'd fetch albums by artist
   }
 
   async function handleSearch() {
@@ -122,6 +162,15 @@ export default function Music() {
 
   function handleAddToQueue(song: Song) {
     addToQueue([song]);
+  }
+
+  // Helper: Normalizar metadados de música com fallbacks
+  function normalizeSongMetadata(song: Song): Song {
+    return {
+      ...song,
+      album: song.album || song.artist || song.title || 'Álbum Desconhecido',
+      artist: song.artist || 'Artista Desconhecido',
+    };
   }
 
   if (isLoading && !isConfigured) {
@@ -228,16 +277,21 @@ export default function Music() {
                     <Table {...getTableProps()}>
                       <TableHead>
                         <TableRow>
-                          {headers.map((header) => (
-                            <TableHeader {...getHeaderProps({ header })} key={header.key}>
-                              {header.header}
-                            </TableHeader>
-                          ))}
+                          {headers.map((header) => {
+                            const headerProps = getHeaderProps({ header });
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+                            const { key: _key, ...rest } = headerProps as any;
+                            return (
+                              <TableHeader key={header.key} {...rest}>
+                                {header.header}
+                              </TableHeader>
+                            );
+                          })}
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {rows.map((row, i) => {
-                          const song = searchResults.songs[i];
+                          const song = normalizeSongMetadata(searchResults.songs[i]);
                           return (
                             <TableRow {...getRowProps({ row })} key={song.id}>
                               <TableCell>{song.title}</TableCell>
@@ -306,8 +360,10 @@ export default function Music() {
               />
             )}
             <div>
-              <h2>{selectedAlbum.name}</h2>
-              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>{selectedAlbum.artist}</p>
+              <h2>{selectedAlbum.name === '[Unknown Album]' ? selectedAlbum.artist || 'Álbum Desconhecido' : selectedAlbum.name}</h2>
+              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>
+                {selectedAlbum.artist || 'Artista Desconhecido'}
+              </p>
               {selectedAlbum.year && <p style={{ color: '#8d8d8d' }}>{selectedAlbum.year}</p>}
               <Button
                 kind="primary"
@@ -334,16 +390,21 @@ export default function Music() {
                 <Table {...getTableProps()}>
                   <TableHead>
                     <TableRow>
-                      {headers.map((header) => (
-                        <TableHeader {...getHeaderProps({ header })} key={header.key}>
-                          {header.header}
-                        </TableHeader>
-                      ))}
+                      {headers.map((header) => {
+                        const headerProps = getHeaderProps({ header });
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+                        const { key: _key, ...rest } = headerProps as any;
+                        return (
+                          <TableHeader key={header.key} {...rest}>
+                            {header.header}
+                          </TableHeader>
+                        );
+                      })}
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {rows.map((row, i) => {
-                      const song = selectedAlbum.songs[i];
+                      const song = normalizeSongMetadata(selectedAlbum.songs[i]);
                       return (
                         <TableRow {...getRowProps({ row })} key={song.id}>
                           <TableCell>{song.track || i + 1}</TableCell>
@@ -378,22 +439,135 @@ export default function Music() {
             )}
           </DataTable>
         </div>
-      ) : (
+      ) : selectedArtist && artistAlbums.length > 0 ? (
         <div>
-          <h2 style={{ marginBottom: '1rem' }}>Artistas</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {artists.map((artist) => (
+          <div style={{ marginBottom: '2rem' }}>
+            <Button kind="ghost" onClick={handleBackToArtists}>
+              ← Voltar para Artistas
+            </Button>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h2>{selectedArtist.name}</h2>
+              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>{artistAlbums.length} álbuns</p>
+            </div>
+            {artistAlbums.length > itemsPerPage && (
+              <Pagination
+                page={albumsPage}
+                totalItems={artistAlbums.length}
+                pageSize={itemsPerPage}
+                pageSizes={[14, 28, 56]}
+                onChange={({ page, pageSize }) => {
+                  setAlbumsPage(page);
+                  if (pageSize !== itemsPerPage) {
+                    setAlbumsPage(1);
+                  }
+                }}
+                size="md"
+              />
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {artistAlbums
+              .slice((albumsPage - 1) * itemsPerPage, albumsPage * itemsPerPage)
+              .map((album) => (
               <Tile
-                key={artist.id}
+                key={album.id}
                 style={{ cursor: 'pointer', padding: '1rem' }}
-                onClick={() => handleArtistClick(artist)}
+                onClick={() => handleAlbumClick(album)}
               >
-                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{artist.name}</div>
+                {album.coverArt && (
+                  <img
+                    src={navidrome.getCoverArtUrl(album.coverArt, 200)}
+                    alt={album.name}
+                    style={{ width: '100%', borderRadius: '4px', marginBottom: '0.5rem' }}
+                  />
+                )}
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
+                  {album.name === '[Unknown Album]' ? album.artist || 'Álbum Desconhecido' : album.name}
+                </div>
                 <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
-                  {artist.albumCount} álbuns
+                  {album.year || 'Ano desconhecido'}
                 </div>
               </Tile>
             ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2>Artistas</h2>
+            <Pagination
+              page={artistsPage}
+              totalItems={artists.length}
+              pageSize={itemsPerPage}
+              pageSizes={[14, 28, 56]}
+              onChange={({ page, pageSize }) => {
+                setArtistsPage(page);
+                if (pageSize !== itemsPerPage) {
+                  // Usuário mudou o tamanho da página
+                  setArtistsPage(1);
+                }
+              }}
+              size="md"
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {artists
+              .slice((artistsPage - 1) * itemsPerPage, artistsPage * itemsPerPage)
+              .map((artist) => {
+              // Usa artistImageUrl ou coverArt se disponível
+              const imageUrl = artist.artistImageUrl || (artist.coverArt ? navidrome.getCoverArtUrl(artist.coverArt, 200) : null);
+
+              return (
+                <Tile
+                  key={artist.id}
+                  style={{ cursor: 'pointer', padding: '1rem' }}
+                  onClick={() => handleArtistClick(artist)}
+                >
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={artist.name}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        marginBottom: '0.5rem'
+                      }}
+                      onError={(e) => {
+                        // Fallback: esconde a imagem se der erro
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        backgroundColor: '#393939',
+                        borderRadius: '4px',
+                        marginBottom: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3rem',
+                        color: '#8d8d8d'
+                      }}
+                    >
+                      {artist.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{artist.name}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
+                    {artist.albumCount} álbuns
+                  </div>
+                </Tile>
+              );
+            })}
           </div>
         </div>
       )}

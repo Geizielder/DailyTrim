@@ -189,6 +189,7 @@ class NavidromeClient {
 
       const records = await pb.collection('navidrome_config').getList(1, 1, {
         filter: `owner = "${userId}"`,
+        $autoCancel: false,
       });
 
       if (records.items.length > 0) {
@@ -372,7 +373,62 @@ class NavidromeClient {
       artists.push(...index.artist);
     });
 
-    return artists;
+    // Para artistas sem coverArt ou artistImageUrl, buscar do primeiro álbum
+    const artistsWithCovers = await Promise.all(
+      artists.map(async (artist) => {
+        // Se já tem imagem, retorna como está
+        if (artist.coverArt || artist.artistImageUrl) {
+          return artist;
+        }
+
+        try {
+          // Busca os álbuns do artista para pegar coverArt do primeiro
+          const artistData = await this.apiRequest<{ artist: Artist & { album: Album[] } }>('getArtist', { id: artist.id });
+          const firstAlbumWithCover = artistData.artist.album?.find(album => album.coverArt);
+
+          if (firstAlbumWithCover?.coverArt) {
+            return { ...artist, coverArt: firstAlbumWithCover.coverArt };
+          }
+        } catch (error) {
+          console.warn('Failed to fetch cover for artist:', artist.id, error);
+        }
+
+        return artist;
+      })
+    );
+
+    return artistsWithCovers;
+  }
+
+  async getArtistAlbums(artistId: string): Promise<Album[]> {
+    const response = await this.apiRequest<{ artist: Artist & { album: Album[] } }>('getArtist', { id: artistId });
+    const albums = response.artist.album || [];
+
+    // Para álbuns sem coverArt (Unknown Album), buscar da primeira música
+    const albumsWithCovers = await Promise.all(
+      albums.map(async (album) => {
+        // Se já tem coverArt ou não é Unknown Album, retorna como está
+        if (album.coverArt || album.name !== '[Unknown Album]') {
+          return album;
+        }
+
+        try {
+          // Busca as músicas do álbum para pegar o coverArt da primeira
+          const albumData = await this.getAlbum(album.id);
+          const firstSongWithCover = albumData.songs.find(song => song.coverArt);
+
+          if (firstSongWithCover?.coverArt) {
+            return { ...album, coverArt: firstSongWithCover.coverArt };
+          }
+        } catch (error) {
+          console.warn('Failed to fetch cover for unknown album:', album.id, error);
+        }
+
+        return album;
+      })
+    );
+
+    return albumsWithCovers;
   }
 
   async getAlbum(id: string): Promise<Album & { songs: Song[] }> {
