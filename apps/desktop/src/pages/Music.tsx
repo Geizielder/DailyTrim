@@ -30,6 +30,8 @@ export default function Music() {
   const [error, setError] = useState<string | null>(null);
 
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [artistAlbums, setArtistAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { songs: Song[] }) | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,10 +83,42 @@ export default function Music() {
   }
 
   async function handleArtistClick(artist: Artist) {
+    try {
+      setIsLoading(true);
+      setSelectedArtist(artist);
+      setSelectedAlbum(null);
+      setSearchResults(null);
+
+      const albums = await navidrome.getArtistAlbums(artist.id);
+      setArtistAlbums(albums);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load artist albums:', err);
+      setError('Erro ao carregar álbuns do artista');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleAlbumClick(album: Album) {
+    try {
+      setIsLoading(true);
+      const albumData = await navidrome.getAlbum(album.id);
+      setSelectedAlbum(albumData);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load album:', err);
+      setError('Erro ao carregar álbum');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleBackToArtists() {
+    setSelectedArtist(null);
+    setArtistAlbums([]);
     setSelectedAlbum(null);
     setSearchResults(null);
-    console.log('Artist clicked:', artist);
-    // TODO: In a real implementation, you'd fetch albums by artist
   }
 
   async function handleSearch() {
@@ -377,6 +411,39 @@ export default function Music() {
               </TableContainer>
             )}
           </DataTable>
+        </div>
+      ) : selectedArtist && artistAlbums.length > 0 ? (
+        <div>
+          <div style={{ marginBottom: '2rem' }}>
+            <Button kind="ghost" onClick={handleBackToArtists}>
+              ← Voltar para Artistas
+            </Button>
+          </div>
+
+          <h2 style={{ marginBottom: '1rem' }}>{selectedArtist.name}</h2>
+          <p style={{ color: '#8d8d8d', marginBottom: '2rem' }}>{artistAlbums.length} álbuns</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {artistAlbums.map((album) => (
+              <Tile
+                key={album.id}
+                style={{ cursor: 'pointer', padding: '1rem' }}
+                onClick={() => handleAlbumClick(album)}
+              >
+                {album.coverArt && (
+                  <img
+                    src={navidrome.getCoverArtUrl(album.coverArt, 200)}
+                    alt={album.name}
+                    style={{ width: '100%', borderRadius: '4px', marginBottom: '0.5rem' }}
+                  />
+                )}
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{album.name}</div>
+                <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
+                  {album.year || 'Ano desconhecido'}
+                </div>
+              </Tile>
+            ))}
+          </div>
         </div>
       ) : (
         <div>

@@ -375,6 +375,11 @@ class NavidromeClient {
     return artists;
   }
 
+  async getArtistAlbums(artistId: string): Promise<Album[]> {
+    const response = await this.apiRequest<{ artist: Artist & { album: Album[] } }>('getArtist', { id: artistId });
+    return response.artist.album || [];
+  }
+
   async getAlbum(id: string): Promise<Album & { songs: Song[] }> {
     const response = await this.apiRequest<AlbumResponse>('getAlbum', { id });
     return {
