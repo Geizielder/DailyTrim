@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { TextInput, Button, InlineNotification, PasswordInput } from "@carbon/react";
 import { useNavigate } from "react-router-dom";
 import { pb } from "../lib/pb";
@@ -9,7 +9,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
     try {
       await pb.collection("users").authWithPassword(email, password);

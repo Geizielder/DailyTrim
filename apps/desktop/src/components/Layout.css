@@ -1,0 +1,76 @@
+/* Custom Header styles to match sidebar color - force dark theme */
+.cds--header {
+  background-color: #161616 !important;
+  border-bottom: 1px solid #262626 !important;
+}
+
+/* Ensure all child elements inherit the dark background */
+.cds--header * {
+  background-color: transparent !important;
+}
+
+/* Header name styling */
+.cds--header__name {
+  color: #f4f4f4 !important;
+  border-bottom: none !important;
+  background-color: transparent !important;
+}
+
+.cds--header__name:hover {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* Header navigation container - force dark background */
+.cds--header__nav,
+.cds--header-nav {
+  background-color: #161616 !important;
+}
+
+/* Header menu items */
+.cds--header__menu-item {
+  color: #c6c6c6 !important;
+  background-color: transparent !important;
+  border-bottom: 3px solid transparent !important;
+}
+
+.cds--header__menu-item:hover {
+  background-color: #353535 !important;
+  color: #f4f4f4 !important;
+}
+
+/* Active/current page */
+.cds--header__menu-item[aria-current="page"] {
+  background-color: #393939 !important;
+  color: #ffffff !important;
+  border-bottom: 3px solid #0f62fe !important;
+}
+
+/* Header global bar and actions */
+.cds--header__global {
+  background-color: #161616 !important;
+}
+
+/* Header action buttons */
+.cds--header__action {
+  color: #c6c6c6 !important;
+  background-color: transparent !important;
+}
+
+.cds--header__action:hover {
+  background-color: #353535 !important;
+  color: #ffffff !important;
+}
+
+/* Menu button (hamburger) */
+.cds--header__menu-toggle,
+.cds--header__menu-trigger {
+  color: #c6c6c6 !important;
+  background-color: transparent !important;
+}
+
+.cds--header__menu-toggle:hover,
+.cds--header__menu-trigger:hover {
+  background-color: #353535 !important;
+  color: #ffffff !important;
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { TextInput, Button, InlineNotification, PasswordInput } from "@carbon/react";
 import { useNavigate } from "react-router-dom";
 import { pb } from "../lib/pb";
@@ -10,7 +10,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  async function handleRegister(e: React.FormEvent) {
+  async function handleRegister(e: FormEvent) {
     e.preventDefault();
     try {
       await pb.collection("users").create({
