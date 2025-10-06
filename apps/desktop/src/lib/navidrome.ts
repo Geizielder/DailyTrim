@@ -372,7 +372,31 @@ class NavidromeClient {
       artists.push(...index.artist);
     });
 
-    return artists;
+    // Para artistas sem coverArt ou artistImageUrl, buscar do primeiro álbum
+    const artistsWithCovers = await Promise.all(
+      artists.map(async (artist) => {
+        // Se já tem imagem, retorna como está
+        if (artist.coverArt || artist.artistImageUrl) {
+          return artist;
+        }
+
+        try {
+          // Busca os álbuns do artista para pegar coverArt do primeiro
+          const artistData = await this.apiRequest<{ artist: Artist & { album: Album[] } }>('getArtist', { id: artist.id });
+          const firstAlbumWithCover = artistData.artist.album?.find(album => album.coverArt);
+
+          if (firstAlbumWithCover?.coverArt) {
+            return { ...artist, coverArt: firstAlbumWithCover.coverArt };
+          }
+        } catch (error) {
+          console.warn('Failed to fetch cover for artist:', artist.id, error);
+        }
+
+        return artist;
+      })
+    );
+
+    return artistsWithCovers;
   }
 
   async getArtistAlbums(artistId: string): Promise<Album[]> {
