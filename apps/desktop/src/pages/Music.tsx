@@ -13,6 +13,7 @@ import {
   Tile,
   Loading,
   InlineNotification,
+  Pagination,
 } from '@carbon/react';
 import { Settings, PlayFilled, Add } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +41,11 @@ export default function Music() {
     albums: Album[];
     songs: Song[];
   } | null>(null);
+
+  // Paginação
+  const [artistsPage, setArtistsPage] = useState(1);
+  const [albumsPage, setAlbumsPage] = useState(1);
+  const itemsPerPage = 14;
 
   useEffect(() => {
     checkConfiguration();
@@ -349,8 +355,10 @@ export default function Music() {
               />
             )}
             <div>
-              <h2>{selectedAlbum.name}</h2>
-              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>{selectedAlbum.artist}</p>
+              <h2>{selectedAlbum.name === '[Unknown Album]' ? selectedAlbum.artist || 'Álbum Desconhecido' : selectedAlbum.name}</h2>
+              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>
+                {selectedAlbum.artist || 'Artista Desconhecido'}
+              </p>
               {selectedAlbum.year && <p style={{ color: '#8d8d8d' }}>{selectedAlbum.year}</p>}
               <Button
                 kind="primary"
@@ -429,11 +437,32 @@ export default function Music() {
             </Button>
           </div>
 
-          <h2 style={{ marginBottom: '1rem' }}>{selectedArtist.name}</h2>
-          <p style={{ color: '#8d8d8d', marginBottom: '2rem' }}>{artistAlbums.length} álbuns</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h2>{selectedArtist.name}</h2>
+              <p style={{ color: '#8d8d8d', marginTop: '0.5rem' }}>{artistAlbums.length} álbuns</p>
+            </div>
+            {artistAlbums.length > itemsPerPage && (
+              <Pagination
+                page={albumsPage}
+                totalItems={artistAlbums.length}
+                pageSize={itemsPerPage}
+                pageSizes={[14, 28, 56]}
+                onChange={({ page, pageSize }) => {
+                  setAlbumsPage(page);
+                  if (pageSize !== itemsPerPage) {
+                    setAlbumsPage(1);
+                  }
+                }}
+                size="md"
+              />
+            )}
+          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {artistAlbums.map((album) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {artistAlbums
+              .slice((albumsPage - 1) * itemsPerPage, albumsPage * itemsPerPage)
+              .map((album) => (
               <Tile
                 key={album.id}
                 style={{ cursor: 'pointer', padding: '1rem' }}
@@ -446,7 +475,9 @@ export default function Music() {
                     style={{ width: '100%', borderRadius: '4px', marginBottom: '0.5rem' }}
                   />
                 )}
-                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{album.name}</div>
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
+                  {album.name === '[Unknown Album]' ? album.artist || 'Álbum Desconhecido' : album.name}
+                </div>
                 <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
                   {album.year || 'Ano desconhecido'}
                 </div>
@@ -456,9 +487,27 @@ export default function Music() {
         </div>
       ) : (
         <div>
-          <h2 style={{ marginBottom: '1rem' }}>Artistas</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {artists.map((artist) => {
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2>Artistas</h2>
+            <Pagination
+              page={artistsPage}
+              totalItems={artists.length}
+              pageSize={itemsPerPage}
+              pageSizes={[14, 28, 56]}
+              onChange={({ page, pageSize }) => {
+                setArtistsPage(page);
+                if (pageSize !== itemsPerPage) {
+                  // Usuário mudou o tamanho da página
+                  setArtistsPage(1);
+                }
+              }}
+              size="md"
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {artists
+              .slice((artistsPage - 1) * itemsPerPage, artistsPage * itemsPerPage)
+              .map((artist) => {
               // Usa artistImageUrl ou coverArt se disponível
               const imageUrl = artist.artistImageUrl || (artist.coverArt ? navidrome.getCoverArtUrl(artist.coverArt, 200) : null);
 
