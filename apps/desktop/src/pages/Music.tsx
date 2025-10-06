@@ -158,6 +158,15 @@ export default function Music() {
     addToQueue([song]);
   }
 
+  // Helper: Normalizar metadados de música com fallbacks
+  function normalizeSongMetadata(song: Song): Song {
+    return {
+      ...song,
+      album: song.album || song.artist || song.title || 'Álbum Desconhecido',
+      artist: song.artist || 'Artista Desconhecido',
+    };
+  }
+
   if (isLoading && !isConfigured) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
@@ -271,7 +280,7 @@ export default function Music() {
                       </TableHead>
                       <TableBody>
                         {rows.map((row, i) => {
-                          const song = searchResults.songs[i];
+                          const song = normalizeSongMetadata(searchResults.songs[i]);
                           return (
                             <TableRow {...getRowProps({ row })} key={song.id}>
                               <TableCell>{song.title}</TableCell>
@@ -377,7 +386,7 @@ export default function Music() {
                   </TableHead>
                   <TableBody>
                     {rows.map((row, i) => {
-                      const song = selectedAlbum.songs[i];
+                      const song = normalizeSongMetadata(selectedAlbum.songs[i]);
                       return (
                         <TableRow {...getRowProps({ row })} key={song.id}>
                           <TableCell>{song.track || i + 1}</TableCell>
@@ -449,18 +458,57 @@ export default function Music() {
         <div>
           <h2 style={{ marginBottom: '1rem' }}>Artistas</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {artists.map((artist) => (
-              <Tile
-                key={artist.id}
-                style={{ cursor: 'pointer', padding: '1rem' }}
-                onClick={() => handleArtistClick(artist)}
-              >
-                <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{artist.name}</div>
-                <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
-                  {artist.albumCount} álbuns
-                </div>
-              </Tile>
-            ))}
+            {artists.map((artist) => {
+              // Usa artistImageUrl ou coverArt se disponível
+              const imageUrl = artist.artistImageUrl || (artist.coverArt ? navidrome.getCoverArtUrl(artist.coverArt, 200) : null);
+
+              return (
+                <Tile
+                  key={artist.id}
+                  style={{ cursor: 'pointer', padding: '1rem' }}
+                  onClick={() => handleArtistClick(artist)}
+                >
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={artist.name}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        marginBottom: '0.5rem'
+                      }}
+                      onError={(e) => {
+                        // Fallback: esconde a imagem se der erro
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        backgroundColor: '#393939',
+                        borderRadius: '4px',
+                        marginBottom: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3rem',
+                        color: '#8d8d8d'
+                      }}
+                    >
+                      {artist.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{artist.name}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#8d8d8d' }}>
+                    {artist.albumCount} álbuns
+                  </div>
+                </Tile>
+              );
+            })}
           </div>
         </div>
       )}
