@@ -12,12 +12,15 @@
 
 ## 🚧 v0.2 (Em Desenvolvimento)
 - ✅ **Music Player** - Integração com Navidrome
-  - ✅ Navegação por artistas/álbuns/músicas
-  - ✅ Player com controles completos
-  - ✅ Busca global
-  - ✅ Queue management
-  - 🔄 Browse de álbuns por artista
+  - ✅ Navegação por artistas → álbuns → músicas
+  - ✅ Player com controles completos (play/pause, next/previous, volume, seek)
+  - ✅ Busca global de artistas, álbuns e músicas
+  - ✅ Queue management (adicionar, limpar, próxima/anterior)
+  - ✅ Shuffle e Repeat modes
+  - ✅ Display de capa de álbum
   - 🔄 Playlists personalizadas
+  - 🔄 Visualização da fila de reprodução
+  - 🔄 Keyboard shortcuts (espaço para play/pause, setas)
 
 - 📝 **Editor de Anotações** - [Lexical Editor](https://lexical.dev)
   - Rich text editor baseado no [Playground do Lexical](https://playground.lexical.dev/)
