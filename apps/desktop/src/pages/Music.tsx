@@ -277,11 +277,16 @@ export default function Music() {
                     <Table {...getTableProps()}>
                       <TableHead>
                         <TableRow>
-                          {headers.map((header) => (
-                            <TableHeader {...getHeaderProps({ header })} key={header.key}>
-                              {header.header}
-                            </TableHeader>
-                          ))}
+                          {headers.map((header) => {
+                            const headerProps = getHeaderProps({ header });
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+                            const { key: _key, ...rest } = headerProps as any;
+                            return (
+                              <TableHeader key={header.key} {...rest}>
+                                {header.header}
+                              </TableHeader>
+                            );
+                          })}
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -385,11 +390,16 @@ export default function Music() {
                 <Table {...getTableProps()}>
                   <TableHead>
                     <TableRow>
-                      {headers.map((header) => (
-                        <TableHeader {...getHeaderProps({ header })} key={header.key}>
-                          {header.header}
-                        </TableHeader>
-                      ))}
+                      {headers.map((header) => {
+                        const headerProps = getHeaderProps({ header });
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+                        const { key: _key, ...rest } = headerProps as any;
+                        return (
+                          <TableHeader key={header.key} {...rest}>
+                            {header.header}
+                          </TableHeader>
+                        );
+                      })}
                     </TableRow>
                   </TableHead>
                   <TableBody>

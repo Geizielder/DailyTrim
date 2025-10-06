@@ -189,6 +189,7 @@ class NavidromeClient {
 
       const records = await pb.collection('navidrome_config').getList(1, 1, {
         filter: `owner = "${userId}"`,
+        $autoCancel: false,
       });
 
       if (records.items.length > 0) {
