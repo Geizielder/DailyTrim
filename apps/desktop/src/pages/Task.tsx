@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import ReactDOM from "react-dom";
 
 // Type alias para o retorno do setInterval
@@ -125,7 +125,7 @@ export default function Tasks() {
     }
   }
 
-  async function addTask(e: React.FormEvent) {
+  async function addTask(e: FormEvent) {
     e.preventDefault();
 
     if (!newTitle.trim()) {
@@ -309,8 +309,7 @@ export default function Tasks() {
 
   useEffect(() => {
     loadTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // loadTasks não muda, então [] é seguro aqui
 
   const headers = allColumns.filter(col => visibleColumns.includes(col.key));
 
@@ -339,7 +338,9 @@ export default function Tasks() {
     }));
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div>
+      <h1 style={{ marginBottom: "2rem" }}>Tarefas</h1>
+
       {error && (
         <InlineNotification
           kind="error"
@@ -361,7 +362,6 @@ export default function Tasks() {
           getExpandedRowProps,
         }) => (
           <TableContainer
-            title="Tarefas"
             description="Gerencie suas tarefas diárias"
           >
             <TableToolbar>
