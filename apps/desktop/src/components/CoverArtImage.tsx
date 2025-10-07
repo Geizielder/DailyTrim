@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useMusicStore } from '../lib/musicStore';
 
 interface CoverArtImageProps {
   src: string;
   alt: string;
-  style?: React.CSSProperties;
-  fallback?: React.ReactNode;
+  style?: CSSProperties;
+  fallback?: ReactNode;
   timeout?: number; // Timeout em milissegundos (padrão: 5000ms)
 }
 

@@ -18,9 +18,10 @@
   - ✅ Queue management (adicionar, limpar, próxima/anterior)
   - ✅ Shuffle e Repeat modes
   - ✅ Display de capa de álbum
+  - ✅ Error handling para servidor offline (timeout, fallback, indicador)
+  - ✅ Visualização da fila de reprodução (drawer discreto no canto inferior)
+  - ✅ Keyboard shortcuts (espaço, setas, Q para fila)
   - 🔄 Playlists personalizadas
-  - 🔄 Visualização da fila de reprodução
-  - 🔄 Keyboard shortcuts (espaço para play/pause, setas)
 
 - 📝 **Editor de Anotações** - [Lexical Editor](https://lexical.dev)
   - Rich text editor baseado no [Playground do Lexical](https://playground.lexical.dev/)
