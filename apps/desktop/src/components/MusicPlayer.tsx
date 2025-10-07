@@ -45,17 +45,10 @@ export default function MusicPlayer() {
     toggleRepeat,
   } = useMusicStore();
 
-  if (!currentSong) {
-    return null; // Don't show player if no song is loaded
-  }
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const coverUrl = currentSong.coverArt
-    ? navidrome.getCoverArtUrl(currentSong.coverArt, 80)
-    : '';
-
-  // Keyboard shortcuts
+  // Keyboard shortcuts - MUST be before any conditional return
   useEffect(() => {
+    if (!currentSong) return; // Don't add listeners if no song
+
     const handleKeyPress = (e: KeyboardEvent) => {
       // Ignore if user is typing in an input/textarea
       const target = e.target as HTMLElement;
@@ -96,7 +89,16 @@ export default function MusicPlayer() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [playPause, next, previous, volume, setVolume, isQueueOpen]);
+  }, [currentSong, playPause, next, previous, volume, setVolume, isQueueOpen]);
+
+  if (!currentSong) {
+    return null; // Don't show player if no song is loaded
+  }
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const coverUrl = currentSong.coverArt
+    ? navidrome.getCoverArtUrl(currentSong.coverArt, 80)
+    : '';
 
   return (
     <div
