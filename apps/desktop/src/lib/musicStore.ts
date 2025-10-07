@@ -164,25 +164,38 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
     const { queue, currentSong, shuffle, repeat } = get();
     if (queue.length === 0) return;
 
-    let nextIndex = 0;
     if (currentSong) {
       const currentIndex = queue.findIndex((s) => s.id === currentSong.id);
+
       if (shuffle) {
         // Random song (excluding current)
         const availableIndices = queue
           .map((_, i) => i)
           .filter((i) => i !== currentIndex);
-        nextIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        if (availableIndices.length > 0) {
+          const nextIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+          get().setCurrentSong(queue[nextIndex]);
+          get().play();
+        }
       } else {
-        nextIndex = (currentIndex + 1) % queue.length;
-      }
-    }
+        const nextIndex = currentIndex + 1;
 
-    const nextSong = queue[nextIndex];
-    if (nextSong) {
-      get().setCurrentSong(nextSong);
-      get().play();
-    } else if (repeat === 'all') {
+        // Check if there's a next song
+        if (nextIndex < queue.length) {
+          // There's a next song, play it
+          get().setCurrentSong(queue[nextIndex]);
+          get().play();
+        } else if (repeat === 'all') {
+          // End of queue, but repeat is on, go back to start
+          get().setCurrentSong(queue[0]);
+          get().play();
+        } else {
+          // End of queue, no repeat, stop playback
+          get().pause();
+        }
+      }
+    } else if (queue.length > 0) {
+      // No current song, start from beginning
       get().setCurrentSong(queue[0]);
       get().play();
     }

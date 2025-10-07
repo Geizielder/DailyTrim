@@ -7,7 +7,7 @@ interface QueueDrawerProps {
 }
 
 export default function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
-  const { queue, currentSong, removeFromQueue, clearQueue, setCurrentSong } = useMusicStore();
+  const { queue, currentSong, removeFromQueue, clearQueue, setCurrentSong, play } = useMusicStore();
 
   if (!isOpen) return null;
 
@@ -23,6 +23,8 @@ export default function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
 
   const handlePlaySong = (index: number) => {
     setCurrentSong(queue[index]);
+    // Small delay to ensure song is set before playing
+    setTimeout(() => play(), 50);
   };
 
   return (
