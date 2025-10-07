@@ -352,6 +352,12 @@ export default function Music() {
         </div>
       ) : selectedAlbum ? (
         <div>
+          <div style={{ marginBottom: '2rem' }}>
+            <Button kind="ghost" onClick={() => setSelectedAlbum(null)}>
+              ← Voltar
+            </Button>
+          </div>
+
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
             {selectedAlbum.coverArt && (
               <CoverArtImage
