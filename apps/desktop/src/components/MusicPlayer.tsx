@@ -1,5 +1,6 @@
 import { useMusicStore } from '../lib/musicStore';
 import { navidrome } from '../lib/navidrome';
+import CoverArtImage from './CoverArtImage';
 import {
   PlayFilled,
   PauseFilled,
@@ -10,6 +11,7 @@ import {
   Shuffle,
   Repeat,
   RepeatOne,
+  WarningAlt,
 } from '@carbon/icons-react';
 
 function formatTime(seconds: number): string {
@@ -28,6 +30,7 @@ export default function MusicPlayer() {
     volume,
     shuffle,
     repeat,
+    isServerAvailable,
     playPause,
     next,
     previous,
@@ -65,17 +68,34 @@ export default function MusicPlayer() {
     >
       {/* Song Info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '250px' }}>
-        {coverUrl && (
-          <img
+        {coverUrl ? (
+          <CoverArtImage
             src={coverUrl}
-            alt={currentSong.album}
+            alt={currentSong.album || currentSong.title}
             style={{
               width: '56px',
               height: '56px',
               borderRadius: '4px',
               objectFit: 'cover',
             }}
+            timeout={5000}
           />
+        ) : (
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '4px',
+              backgroundColor: '#393939',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#8d8d8d',
+              fontSize: '1.5rem',
+            }}
+          >
+            {currentSong.title.charAt(0).toUpperCase()}
+          </div>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -102,6 +122,22 @@ export default function MusicPlayer() {
             {currentSong.artist}
           </div>
         </div>
+        {!isServerAvailable && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: '#da1e28',
+              fontSize: '0.75rem',
+              paddingRight: '0.5rem',
+            }}
+            title="Servidor Navidrome indisponível"
+          >
+            <WarningAlt size={16} />
+            <span>Offline</span>
+          </div>
+        )}
       </div>
 
       {/* Player Controls */}
