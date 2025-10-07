@@ -37,7 +37,9 @@ export default function Dashboard() {
 
   async function loadStats() {
     try {
-      const tasks = await pb.collection("tasks").getFullList<Task>();
+      const tasks = await pb.collection("tasks").getFullList<Task>({
+        $autoCancel: false,
+      });
 
       const stats: DashboardStats = {
         totalTasks: tasks.length,
