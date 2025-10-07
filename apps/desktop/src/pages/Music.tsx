@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { navidrome } from '../lib/navidrome';
 import { useMusicStore } from '../lib/musicStore';
 import MusicPlayer from '../components/MusicPlayer';
+import CoverArtImage from '../components/CoverArtImage';
 import type { Artist, Album, Song } from '../types/music';
 
 export default function Music() {
@@ -353,10 +354,11 @@ export default function Music() {
         <div>
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
             {selectedAlbum.coverArt && (
-              <img
+              <CoverArtImage
                 src={navidrome.getCoverArtUrl(selectedAlbum.coverArt, 300)}
                 alt={selectedAlbum.name}
                 style={{ width: '200px', height: '200px', borderRadius: '8px', objectFit: 'cover' }}
+                timeout={5000}
               />
             )}
             <div>
@@ -478,12 +480,30 @@ export default function Music() {
                 style={{ cursor: 'pointer', padding: '1rem' }}
                 onClick={() => handleAlbumClick(album)}
               >
-                {album.coverArt && (
-                  <img
+                {album.coverArt ? (
+                  <CoverArtImage
                     src={navidrome.getCoverArtUrl(album.coverArt, 200)}
                     alt={album.name}
-                    style={{ width: '100%', borderRadius: '4px', marginBottom: '0.5rem' }}
+                    style={{ width: '100%', aspectRatio: '1', borderRadius: '4px', marginBottom: '0.5rem', objectFit: 'cover' }}
+                    timeout={5000}
                   />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1',
+                      backgroundColor: '#393939',
+                      borderRadius: '4px',
+                      marginBottom: '0.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '3rem',
+                      color: '#8d8d8d'
+                    }}
+                  >
+                    {(album.name === '[Unknown Album]' ? album.artist : album.name)?.charAt(0).toUpperCase()}
+                  </div>
                 )}
                 <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
                   {album.name === '[Unknown Album]' ? album.artist || 'Álbum Desconhecido' : album.name}
@@ -528,7 +548,7 @@ export default function Music() {
                   onClick={() => handleArtistClick(artist)}
                 >
                   {imageUrl ? (
-                    <img
+                    <CoverArtImage
                       src={imageUrl}
                       alt={artist.name}
                       style={{
@@ -538,10 +558,25 @@ export default function Music() {
                         borderRadius: '4px',
                         marginBottom: '0.5rem'
                       }}
-                      onError={(e) => {
-                        // Fallback: esconde a imagem se der erro
-                        e.currentTarget.style.display = 'none';
-                      }}
+                      timeout={5000}
+                      fallback={
+                        <div
+                          style={{
+                            width: '100%',
+                            aspectRatio: '1',
+                            backgroundColor: '#393939',
+                            borderRadius: '4px',
+                            marginBottom: '0.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '3rem',
+                            color: '#8d8d8d'
+                          }}
+                        >
+                          {artist.name.charAt(0).toUpperCase()}
+                        </div>
+                      }
                     />
                   ) : (
                     <div

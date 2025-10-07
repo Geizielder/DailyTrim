@@ -7,6 +7,10 @@ interface MusicStore extends PlayerState {
   // Audio element
   audio: HTMLAudioElement | null;
 
+  // Connection state
+  isServerAvailable: boolean;
+  setServerAvailable: (_available: boolean) => void;
+
   // Actions
   setCurrentSong: (_song: Song | null) => void;
   addToQueue: (_songs: Song[]) => void;
@@ -40,6 +44,11 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
   shuffle: false,
   repeat: 'none',
   audio: null,
+  isServerAvailable: true,
+
+  setServerAvailable: (available) => {
+    set({ isServerAvailable: available });
+  },
 
   // Initialize audio element
   initAudio: () => {
