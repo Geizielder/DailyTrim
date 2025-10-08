@@ -135,10 +135,31 @@ pocketbase/
 
 ## 🔐 Segurança
 
-### Senhas Protegidas
-- Campo `password` em `navidrome_config` está **hidden**
-- Pode ser definido (POST/PUT) mas nunca é retornado (GET)
-- Armazenado em plaintext no SQLite (TODO: criptografar)
+### ⚠️ Senhas do Navidrome (Limitação Conhecida)
+
+**Status Atual (v0.2)**:
+- Campo `password` em `navidrome_config` está **hidden** (não aparece em API responses)
+- ❌ **Armazenado em PLAINTEXT** no banco SQLite
+- ⚠️ Visível no Admin UI do PocketBase
+
+**Por que não criptografar?**
+```javascript
+// Problema: Precisamos enviar a senha para a API do Navidrome
+const response = await fetch(`${server_url}/rest/ping`, {
+  auth: { username, password } // ← Precisa ser plaintext!
+})
+```
+
+**Mitigações aplicadas**:
+1. ✅ Campo hidden (não retorna em GET requests)
+2. ✅ RLS rules (apenas owner acessa)
+3. ✅ Banco local (não exposto externamente)
+
+**Solução definitiva (v0.3)**:
+- Usar **token-based auth** do Navidrome
+- Armazenar apenas token (pode ser criptografado)
+- Senha usada apenas uma vez para gerar token
+- Token tem expiração e refresh
 
 ### Admin UI
 - Protegido por login
