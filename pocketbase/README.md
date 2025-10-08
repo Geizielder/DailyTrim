@@ -74,8 +74,12 @@ Após rodar as migrations, você terá:
 
 ### 3. **navidrome_config**
 - Configuração do servidor Navidrome
-- URL, username, password (hidden!)
+- URL, username, **encrypted_password** (AES-256-GCM via Rust)
 - Owner (relation → users)
+- ⚠️ **Senha NUNCA é armazenada em plaintext**
+  - Criptografada no Rust antes de salvar
+  - Descriptografada apenas em memória para gerar token MD5
+  - Frontend nunca tem acesso à senha plaintext
 
 ---
 
@@ -123,7 +127,7 @@ pocketbase/
 │   ├── 1730560000_create_tasks.js
 │   ├── 1759510273_updated_tasks.js
 │   ├── 1759520000_create_navidrome_config.js
-│   └── 1760000000_fix_navidrome_password_hidden.js
+│   └── 1760000000_alter_navidrome_config_encrypted_password.js
 ├── pb_data/                # Banco SQLite (NÃO VERSIONADO)
 │   ├── data.db            # Arquivo do banco
 │   ├── logs.db            # Logs do sistema
@@ -135,31 +139,46 @@ pocketbase/
 
 ## 🔐 Segurança
 
-### ⚠️ Senhas do Navidrome (Limitação Conhecida)
+### ✅ Senhas do Navidrome (Criptografia Implementada)
 
-**Status Atual (v0.2)**:
-- Campo `password` em `navidrome_config` está **hidden** (não aparece em API responses)
-- ❌ **Armazenado em PLAINTEXT** no banco SQLite
-- ⚠️ Visível no Admin UI do PocketBase
+**Status Atual (v0.2.1)**:
+- ✅ **Senha SEMPRE criptografada** com AES-256-GCM
+- ✅ Criptografia/descriptografia feita no **Rust backend** (Tauri)
+- ✅ Frontend **NUNCA** tem acesso à senha em plaintext
+- ✅ Descriptografia apenas em memória para gerar token MD5
 
-**Por que não criptografar?**
-```javascript
-// Problema: Precisamos enviar a senha para a API do Navidrome
-const response = await fetch(`${server_url}/rest/ping`, {
-  auth: { username, password } // ← Precisa ser plaintext!
-})
+**Arquitetura de segurança**:
+```
+Frontend (React)
+  └── invoke('save_navidrome_config', { password }) // plaintext temporário
+        ↓
+      Rust Backend (Tauri)
+        └── encrypt_password(password) → AES-256-GCM
+              ↓
+            PocketBase (SQLite)
+              └── encrypted_password: "base64(nonce+ciphertext)"
+
+Frontend (React)
+  └── invoke('generate_navidrome_auth', { encrypted_password, salt })
+        ↓
+      Rust Backend (Tauri)
+        └── decrypt_password(encrypted) → plaintext em memória
+              └── md5(password + salt) → token
+                    └── retorna token (senha dropped)
+                          ↓
+                        Frontend recebe apenas token
 ```
 
-**Mitigações aplicadas**:
-1. ✅ Campo hidden (não retorna em GET requests)
-2. ✅ RLS rules (apenas owner acessa)
-3. ✅ Banco local (não exposto externamente)
+**Chave de criptografia**:
+- Derivada de dados da máquina (COMPUTERNAME, USERNAME, USERDOMAIN)
+- Única por instalação
+- ⚠️ Se reinstalar Windows, precisará reconfigurar Navidrome
+- 🔮 Futuro: Usar Windows DPAPI ou keyring para chave persistente
 
-**Solução definitiva (v0.3)**:
-- Usar **token-based auth** do Navidrome
-- Armazenar apenas token (pode ser criptografado)
-- Senha usada apenas uma vez para gerar token
-- Token tem expiração e refresh
+**Por que não usar keyring/DPAPI agora?**
+- Adiciona dependências extras (ring, winapi)
+- Implementação atual é segura para uso local desktop
+- v1.0 terá keyring integrado
 
 ### Admin UI
 - Protegido por login

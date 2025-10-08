@@ -51,7 +51,7 @@ export interface NavidromeConfig {
   id?: string;
   server_url: string;
   username: string;
-  password: string;
+  encrypted_password: string; // Senha sempre criptografada (nunca plaintext)
   token?: string;
   salt?: string;
   owner?: string;
