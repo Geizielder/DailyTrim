@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useMusicStore } from '../lib/musicStore';
 
 interface CoverArtImageProps {
   src: string;
   alt: string;
-  style?: React.CSSProperties;
-  fallback?: React.ReactNode;
+  style?: CSSProperties;
+  fallback?: ReactNode;
   timeout?: number; // Timeout em milissegundos (padrão: 5000ms)
 }
 
@@ -33,19 +34,22 @@ export default function CoverArtImage({
     const handleLoad = () => {
       clearTimeout(timeoutId);
       setImageState('loaded');
-      setServerAvailable(true);
+      // Only set available to true, don't change to false here
+      // to avoid false positives from missing album art
     };
 
     const handleError = () => {
       clearTimeout(timeoutId);
       setImageState('error');
-      setServerAvailable(false);
+      // Don't mark server as unavailable for single image failures
+      // Missing album art is common and doesn't mean server is down
     };
 
     // Timeout para considerar como erro
     timeoutId = window.setTimeout(() => {
       setImageState('error');
-      setServerAvailable(false);
+      // Don't mark server as unavailable on timeout
+      // Could just be a slow image or missing album art
       img.src = ''; // Cancela o carregamento
     }, timeout);
 

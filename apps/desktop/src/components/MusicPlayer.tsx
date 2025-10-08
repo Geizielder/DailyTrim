@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useMusicStore } from '../lib/musicStore';
 import { navidrome } from '../lib/navidrome';
 import CoverArtImage from './CoverArtImage';
+import QueueDrawer from './QueueDrawer';
 import {
   PlayFilled,
   PauseFilled,
@@ -12,6 +14,7 @@ import {
   Repeat,
   RepeatOne,
   WarningAlt,
+  Playlist,
 } from '@carbon/icons-react';
 
 function formatTime(seconds: number): string {
@@ -22,6 +25,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function MusicPlayer() {
+  const [isQueueOpen, setIsQueueOpen] = useState(false);
+
   const {
     currentSong,
     isPlaying,
@@ -39,6 +44,52 @@ export default function MusicPlayer() {
     toggleShuffle,
     toggleRepeat,
   } = useMusicStore();
+
+  // Keyboard shortcuts - MUST be before any conditional return
+  useEffect(() => {
+    if (!currentSong) return; // Don't add listeners if no song
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ': // Space - Play/Pause
+          e.preventDefault();
+          playPause();
+          break;
+        case 'ArrowLeft': // Left Arrow - Previous
+          e.preventDefault();
+          previous();
+          break;
+        case 'ArrowRight': // Right Arrow - Next
+          e.preventDefault();
+          next();
+          break;
+        case 'ArrowUp': // Up Arrow - Volume Up
+          e.preventDefault();
+          setVolume(Math.min(1, volume + 0.1));
+          break;
+        case 'ArrowDown': // Down Arrow - Volume Down
+          e.preventDefault();
+          setVolume(Math.max(0, volume - 0.1));
+          break;
+        case 'q':
+        case 'Q': // Q - Toggle Queue
+          e.preventDefault();
+          setIsQueueOpen(!isQueueOpen);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentSong, playPause, next, previous, volume, setVolume, isQueueOpen]);
 
   if (!currentSong) {
     return null; // Don't show player if no song is loaded
@@ -287,7 +338,25 @@ export default function MusicPlayer() {
             cursor: 'pointer',
           }}
         />
+
+        {/* Queue Button */}
+        <button
+          onClick={() => setIsQueueOpen(!isQueueOpen)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: isQueueOpen ? '#0f62fe' : '#8d8d8d',
+            cursor: 'pointer',
+            padding: '0.5rem',
+          }}
+          title="Fila de reprodução"
+        >
+          <Playlist size={20} />
+        </button>
       </div>
+
+      {/* Queue Drawer */}
+      <QueueDrawer isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
     </div>
   );
 }

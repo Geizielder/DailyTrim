@@ -23,3 +23,7 @@ src-tauri/Cargo.lock
 .DS_Store
 Thumbs.db
 .gitmessage.txt
+
+# Claude AI configuration (never commit)
+CLAUDE.md
+erro_atual.txt
